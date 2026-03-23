@@ -8,9 +8,19 @@
   // Constants
   // ---------------------------------------------------------------------------
 
-  const MANIFEST_URL = 'manifest.json';
   const THEME_KEY = 'theme';
   const SHIKI_CDN = 'https://cdn.jsdelivr.net/npm/shiki/+esm';
+
+  // Cache-bust version: extracted from app.js?v=xxx injected by deploy workflow.
+  // Data files (manifest, toc, chapters) use this to bypass CDN cache after deploy.
+  const CACHE_VERSION = (() => {
+    const s = document.querySelector('script[src*="app.js"]');
+    return s?.src?.match(/\?v=([^&]+)/)?.[1] || '';
+  })();
+
+  function cacheBust(url) {
+    return CACHE_VERSION ? `${url}?v=${CACHE_VERSION}` : url;
+  }
 
   // ---------------------------------------------------------------------------
   // Module state
@@ -215,7 +225,7 @@
 
   async function fetchManifest() {
     if (manifestCache) return manifestCache;
-    const res = await fetch(MANIFEST_URL);
+    const res = await fetch(cacheBust('manifest.json'));
     if (!res.ok) {
       throw new Error(`Failed to load manifest: ${res.status} ${MANIFEST_URL}`);
     }
@@ -374,7 +384,7 @@
   async function fetchToc(bookId) {
     if (tocCache[bookId]) return tocCache[bookId];
     const url = `books/${bookId}/toc.json`;
-    const res = await fetch(url);
+    const res = await fetch(cacheBust(url));
     if (!res.ok) {
       throw new Error(`Failed to load table of contents: ${res.status} ${url}`);
     }
@@ -384,7 +394,7 @@
   }
 
   async function fetchText(url) {
-    const res = await fetch(url);
+    const res = await fetch(cacheBust(url));
     if (!res.ok) {
       throw new Error(`Failed to load ${url}: ${res.status}`);
     }
@@ -730,7 +740,11 @@
 
     if (!adminLoaded) {
       const script = document.createElement('script');
-      script.src = 'assets/admin.js';
+      // Cache-bust: append the same version param that deploy-pages.yml
+      // injects into index.html. Falls back to timestamp if not present.
+      const appScript = document.querySelector('script[src*="app.js"]');
+      const version = appScript?.src?.match(/\?v=([^&]+)/)?.[1] || Date.now();
+      script.src = `assets/admin.js?v=${version}`;
       document.body.appendChild(script);
       adminLoaded = true;
     }
