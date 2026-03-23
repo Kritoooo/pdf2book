@@ -138,6 +138,37 @@ function clearError(el) {
 }
 
 // ---------------------------------------------------------------------------
+// Config file persistence
+// ---------------------------------------------------------------------------
+
+async function saveSplitLevelConfig(level) {
+  const { owner, repo } = getRepoInfo();
+  const levelNum = parseInt(level.replace('H', ''), 10) || 1;
+  const config = JSON.stringify({ split_level: levelNum }, null, 2) + '\n';
+  const encoded = btoa(unescape(encodeURIComponent(config)));
+  const path = '.pdf2book.json';
+
+  let sha;
+  try {
+    const existing = await githubApi(`/repos/${owner}/${repo}/contents/${path}`);
+    sha = existing.sha;
+  } catch (_) {
+    // File doesn't exist yet
+  }
+
+  const body = {
+    message: `chore(admin): update split level to ${level}`,
+    content: encoded,
+  };
+  if (sha) body.sha = sha;
+
+  await githubApi(`/repos/${owner}/${repo}/contents/${path}`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+}
+
+// ---------------------------------------------------------------------------
 // UI rendering — Auth view
 // ---------------------------------------------------------------------------
 
@@ -498,7 +529,13 @@ async function loadBooks(section) {
       tr.appendChild(createElement('td', null, formatDate(book.created_at)));
 
       const tdActions = document.createElement('td');
+      const reconvertBtn = createElement('button', 'btn-secondary', 'Re-convert');
+      reconvertBtn.addEventListener('click', () => {
+        triggerReconvert(book.id, reconvertBtn);
+      });
+      tdActions.appendChild(reconvertBtn);
       const deleteBtn = createElement('button', 'btn-danger', 'Delete');
+      deleteBtn.style.marginLeft = '8px';
       deleteBtn.addEventListener('click', () => {
         confirmDeleteBook(book, section);
       });
@@ -641,6 +678,39 @@ async function updateManifestRemoveBook(repo, bookId) {
 }
 
 // ---------------------------------------------------------------------------
+// Re-conversion via workflow_dispatch
+// ---------------------------------------------------------------------------
+
+async function triggerReconvert(bookId, btn) {
+  const originalText = btn.textContent;
+  btn.textContent = 'Triggering...';
+  btn.disabled = true;
+
+  try {
+    const { owner, repo } = getRepoInfo();
+    await githubApi(`/repos/${owner}/${repo}/actions/workflows/convert.yml/dispatches`, {
+      method: 'POST',
+      body: JSON.stringify({
+        ref: 'main',
+        inputs: { filename: bookId },
+      }),
+    });
+    btn.textContent = 'Triggered!';
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.disabled = false;
+    }, 3000);
+  } catch (err) {
+    btn.textContent = 'Failed';
+    btn.disabled = false;
+    setTimeout(() => {
+      btn.textContent = originalText;
+    }, 3000);
+    showError(btn.parentElement, `Re-convert failed: ${err.message}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Conversion history
 // ---------------------------------------------------------------------------
 
@@ -723,8 +793,13 @@ function renderSettingsSection(dashboardContainer, repo) {
     if (level === currentLevel) option.selected = true;
     splitSelect.appendChild(option);
   });
-  splitSelect.addEventListener('change', () => {
+  splitSelect.addEventListener('change', async () => {
     localStorage.setItem(SPLIT_LEVEL_KEY, splitSelect.value);
+    try {
+      await saveSplitLevelConfig(splitSelect.value);
+    } catch (err) {
+      showError(splitGroup, `Failed to save config: ${err.message}`);
+    }
   });
   splitGroup.appendChild(splitSelect);
 

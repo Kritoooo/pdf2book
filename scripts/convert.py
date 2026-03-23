@@ -5,6 +5,7 @@ Usage: python scripts/convert.py [--input-dir INPUT] [--output-dir OUTPUT] [--sp
 """
 
 import argparse
+import json
 import re
 import shutil
 import sys
@@ -98,7 +99,7 @@ def convert_single_pdf(pdf_path: Path, output_dir: Path, split_level: int = 1) -
     if page_count > PAGE_THRESHOLD:
         markdown = _convert_large_pdf(client, pdf_path, page_count)
     else:
-        markdown = client.convert(pdf_path)
+        markdown = client.convert_pdf(pdf_path)
 
     chapters = split_by_headings(markdown, level=split_level)
     generate_book_structure(book_id, title, chapters, output_dir, split_level)
@@ -119,14 +120,30 @@ def _convert_large_pdf(client: MineruClient, pdf_path: Path, page_count: int) ->
         parts: list[str] = []
         for i, chunk_path in enumerate(chunk_paths, 1):
             print(f"  Converting chunk {i}/{len(chunk_paths)}: {chunk_path.name}")
-            parts.append(client.convert(chunk_path))
+            parts.append(client.convert_pdf(chunk_path))
         return "\n\n".join(parts)
     finally:
         shutil.rmtree(tmp_dir, ignore_errors=True)
 
 
+def _read_config_split_level() -> int | None:
+    """Read split_level from .pdf2book.json if it exists."""
+    config_path = Path(".pdf2book.json")
+    if config_path.exists():
+        try:
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            level = config.get("split_level")
+            if level in (1, 2, 3):
+                return level
+        except (json.JSONDecodeError, KeyError):
+            pass
+    return None
+
+
 def main() -> None:
     """Main entry point. Parse args, run pipeline."""
+    config_level = _read_config_split_level()
+
     parser = argparse.ArgumentParser(description="Convert PDFs to online books.")
     parser.add_argument(
         "--input-dir",
@@ -144,8 +161,8 @@ def main() -> None:
         "--split-level",
         type=int,
         choices=[1, 2, 3],
-        default=1,
-        help="Heading level for chapter splitting: 1, 2, or 3 (default: 1)",
+        default=config_level or 1,
+        help="Heading level for chapter splitting: 1, 2, or 3 (default: from .pdf2book.json or 1)",
     )
     args = parser.parse_args()
 

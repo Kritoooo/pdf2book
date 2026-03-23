@@ -173,8 +173,9 @@
     els.bookshelfView.style.display = 'none';
     els.readerView.style.display = 'none';
     els.adminView.style.display = 'none';
-    els.sidebar.classList.remove('open');
+    els.sidebar.classList.remove('open', 'visible');
     els.sidebarBackdrop.classList.remove('visible');
+    document.querySelector('.main-content').classList.remove('with-sidebar');
   }
 
   // ---------------------------------------------------------------------------
@@ -298,6 +299,7 @@
 
     updateTopBar({ showSidebarToggle: true, showBookshelfLink: true, breadcrumb: '' });
     els.sidebar.classList.add('visible');
+    document.querySelector('.main-content').classList.add('with-sidebar');
     els.readerView.style.display = '';
 
     try {
@@ -329,6 +331,7 @@
 
     updateTopBar({ showSidebarToggle: true, showBookshelfLink: true, breadcrumb: '' });
     els.sidebar.classList.add('visible');
+    document.querySelector('.main-content').classList.add('with-sidebar');
     els.readerView.style.display = '';
 
     try {
@@ -395,7 +398,7 @@
   function renderMarkdownContent(text) {
     const rendered = md.render(text);
     const wrapper = document.createElement('article');
-    wrapper.className = 'chapter-content';
+    wrapper.className = 'reader-content';
     // markdown-it is configured with html:false, so the output is safe from
     // raw HTML injection. insertAdjacentHTML is used per the project spec.
     wrapper.insertAdjacentHTML('afterbegin', rendered);
@@ -615,7 +618,7 @@
     nav.appendChild(buildNavLink(bookId, prev, 'prev', 'Previous'));
     nav.appendChild(buildNavLink(bookId, next, 'next', 'Next'));
 
-    const article = els.readerView.querySelector('.chapter-content');
+    const article = els.readerView.querySelector('.reader-content');
     if (article) {
       article.appendChild(nav);
     }
@@ -623,7 +626,7 @@
 
   function buildNavLink(bookId, chapter, direction, labelText) {
     const link = document.createElement('a');
-    link.className = `chapter-nav-link chapter-nav-${direction}`;
+    link.className = `chapter-nav-link chapter-nav-link--${direction}`;
     if (chapter) {
       link.href = `#/${bookId}/chapters/${chapter.slug}`;
       const label = document.createElement('span');
