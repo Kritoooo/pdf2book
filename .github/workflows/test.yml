@@ -1,0 +1,55 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: test-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Validate Python scripts
+        run: python3 -m py_compile scripts/build_manifest.py scripts/convert.py
+
+      - name: Run Python tests
+        run: python3 -m unittest discover -s tests/scripts -v
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Validate browser scripts
+        run: |
+          node --check docs/assets/shared.js
+          node --check docs/assets/app.js
+          node --check docs/assets/admin.js
+
+      - name: Run frontend tests
+        run: npm run test:frontend
