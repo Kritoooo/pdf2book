@@ -48,7 +48,8 @@ export function ContentCard({ item, activeTab }) {
         class={`content-card-cover${item.featured ? ' content-card-cover--featured' : ''}`}
         style={{ background: generateCoverGradient(item.id) }}
       >
-        {badge && <span class="content-card-type-badge">{badge}</span>}
+        <div class="content-card-spine" aria-hidden="true" />
+        {badge && <span class={`content-card-type-badge content-card-type-badge--${type}`}>{badge}</span>}
         {type === 'site' && <ExternalLinkIcon />}
       </div>
       <div class="content-card-info">

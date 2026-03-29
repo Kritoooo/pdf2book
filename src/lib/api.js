@@ -40,7 +40,8 @@ export function getItemDisplayTitle(item) {
 }
 
 export function formatWordCount(count) {
-  if (count >= 1000) return `${Math.round(count / 1000)}k`;
+  if (count >= 10000) return `${Math.round(count / 1000)}k`;
+  if (count >= 1000) return `${(count / 1000).toFixed(1)}k`;
   return String(count);
 }
 
@@ -67,8 +68,10 @@ export function formatRelativeDate(dateStr) {
   const date = new Date(dateStr);
   const now = new Date();
   const diffMs = now - date;
-  const diffDays = Math.floor(diffMs / 86400000);
-  if (diffDays < 1) return 'Today';
+  const diffH = Math.floor(diffMs / 3600000);
+  if (diffH < 1) return 'Just now';
+  if (diffH < 24) return `${diffH}h ago`;
+  const diffDays = Math.floor(diffH / 24);
   if (diffDays === 1) return 'Yesterday';
   if (diffDays < 30) return `${diffDays}d ago`;
   if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;

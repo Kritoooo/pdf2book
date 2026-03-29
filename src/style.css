@@ -254,7 +254,10 @@ button {
 }
 
 .top-bar-title {
-  font-weight: 600;
+  font-family: var(--font-reading);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
   color: var(--color-text-heading);
   text-decoration: none;
   white-space: nowrap;
@@ -3329,21 +3332,31 @@ button {
 .home-error { padding: var(--space-4); border-radius: var(--radius-md); background-color: rgba(197, 48, 48, 0.1); color: var(--color-error); font-family: var(--font-ui); }
 
 /* Content card: mirrors book-card styles */
-.content-card { display: flex; flex-direction: column; text-decoration: none; color: inherit; border-radius: var(--radius-lg); overflow: hidden; background-color: var(--color-bg-surface); border: 1px solid var(--color-border); box-shadow: var(--shadow-subtle); transition: transform var(--transition-normal) ease, box-shadow var(--transition-normal) ease; }
-.content-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+.content-card { display: flex; flex-direction: column; text-decoration: none; color: inherit; border-radius: var(--radius-lg); overflow: hidden; background-color: var(--color-bg-surface); border: 1px solid var(--color-border); box-shadow: var(--shadow-subtle); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+.content-card:hover { transform: translateY(-5px); box-shadow: 0 16px 48px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08); }
 .content-card-cover { position: relative; aspect-ratio: 3/4; display: flex; align-items: center; justify-content: center; padding: var(--space-4); overflow: hidden; transition: filter var(--transition-normal) ease, transform var(--transition-normal) ease; }
 .content-card-cover::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.1)); pointer-events: none; }
+.content-card-cover::before { content: ''; position: absolute; inset: 0; z-index: 3; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.04) 45%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 55%, transparent 70%); opacity: 0; transition: opacity 0.4s ease; pointer-events: none; }
+.content-card:hover .content-card-cover::before { opacity: 1; }
 .content-card:hover .content-card-cover { filter: brightness(1.05); transform: scale(1.03); }
 .content-card-cover--featured::before { content: ''; position: absolute; inset: 0; border: 2px solid rgba(255,255,255,0.3); border-radius: var(--radius-md); z-index: 1; pointer-events: none; }
 .content-card-cover-title { position: relative; z-index: 1; font-family: var(--font-reading); font-size: 16px; font-weight: 600; color: #fff; text-align: center; text-shadow: 0 1px 4px rgba(0,0,0,0.4); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; max-width: 90%; }
 .content-card-info { padding: var(--space-3); flex: 1; display: flex; flex-direction: column; gap: var(--space-1); }
 .content-card-badge { font-family: var(--font-ui); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-accent); }
-.content-card-title { font-family: var(--font-ui); font-size: 14px; font-weight: 600; line-height: 1.3; color: var(--color-text-heading); margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.content-card-title { font-family: var(--font-ui); font-size: 14px; font-weight: 600; line-height: 1.3; color: var(--color-text-heading); margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: color var(--transition-fast); }
+.content-card:hover .content-card-title { color: var(--color-accent); }
 .content-card-byline { font-family: var(--font-ui); font-size: 12px; color: var(--color-text-secondary); margin: 0; }
 .content-card-summary { font-family: var(--font-ui); font-size: 12px; color: var(--color-text-tertiary); line-height: 1.4; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.content-card-meta { font-family: var(--font-ui); font-size: 12px; color: var(--color-text-tertiary); margin-top: auto; padding-top: var(--space-1); }
+.content-card-meta { font-family: var(--font-ui); font-size: 12px; color: var(--color-text-tertiary); margin-top: auto; padding-top: var(--space-2); border-top: 1px solid var(--color-border); }
 .content-card-tags { list-style: none; padding: 0; margin: var(--space-1) 0 0; display: flex; gap: var(--space-1); flex-wrap: wrap; }
 .content-card-tag { font-family: var(--font-ui); font-size: 11px; padding: 1px 6px; border-radius: var(--radius-sm); background: var(--color-bg-page); color: var(--color-text-tertiary); border: 1px solid var(--color-border); }
+
+/* Spine decoration on card cover */
+.content-card-spine { position: absolute; top: var(--space-4); left: var(--space-3); z-index: 1; }
+.content-card-spine::before,
+.content-card-spine::after { content: ''; display: block; height: 2px; border-radius: 1px; background: rgba(255,255,255,0.2); }
+.content-card-spine::before { width: 32px; opacity: 0.18; }
+.content-card-spine::after { width: 20px; opacity: 0.12; margin-top: 5px; }
 
 /* Type badge on card cover */
 .content-card-type-badge {
@@ -3353,15 +3366,17 @@ button {
   z-index: 2;
   font-family: var(--font-ui);
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: var(--radius-sm);
+  border: 1px solid;
+  backdrop-filter: blur(8px);
 }
+.content-card-type-badge--book { color: #7A9B6D; background: rgba(122, 155, 109, 0.12); border-color: rgba(122, 155, 109, 0.25); box-shadow: 0 0 8px rgba(122, 155, 109, 0.25); }
+.content-card-type-badge--doc { color: var(--color-accent); background: rgba(196, 149, 106, 0.12); border-color: rgba(196, 149, 106, 0.25); box-shadow: 0 0 8px rgba(196, 149, 106, 0.25); }
+.content-card-type-badge--site { color: #7BA3B8; background: rgba(123, 163, 184, 0.12); border-color: rgba(123, 163, 184, 0.25); box-shadow: 0 0 8px rgba(123, 163, 184, 0.25); }
 
 /* External link icon on site cards */
 .content-card-external {
@@ -3408,12 +3423,12 @@ button {
 
 /* Card entrance stagger */
 @keyframes card-fade-in {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .home-grid .content-card {
-  animation: card-fade-in var(--transition-slow) ease both;
+  animation: card-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .home-grid .content-card:nth-child(1) { animation-delay: 0ms; }
