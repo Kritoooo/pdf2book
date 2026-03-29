@@ -2,6 +2,7 @@ import { generateCoverGradient } from '../lib/covers';
 import { getItemDisplayTitle, formatWordCount, formatRelativeDate, getItemType, getItemHref, getItemTarget } from '../lib/api';
 
 const TYPE_BADGES = {
+  book: 'BOOK',
   doc: 'DOC',
   site: 'SITE',
 };
@@ -14,7 +15,7 @@ function ExternalLinkIcon() {
   );
 }
 
-export function ContentCard({ item }) {
+export function ContentCard({ item, activeTab }) {
   const type = getItemType(item);
   const title = getItemDisplayTitle(item);
   const byline = typeof item.author === 'string' ? item.author.trim() : '';
@@ -35,7 +36,8 @@ export function ContentCard({ item }) {
   }
 
   const dateLabel = formatRelativeDate(item.created_at);
-  const badge = TYPE_BADGES[type];
+  const showBadge = activeTab === 'all' || activeTab !== type;
+  const badge = showBadge ? TYPE_BADGES[type] : null;
   const href = getItemHref(item);
   const target = getItemTarget(item);
   const rel = target === '_blank' ? 'noopener noreferrer' : undefined;
@@ -46,7 +48,6 @@ export function ContentCard({ item }) {
         class={`content-card-cover${item.featured ? ' content-card-cover--featured' : ''}`}
         style={{ background: generateCoverGradient(item.id) }}
       >
-        <span class="content-card-cover-title">{title}</span>
         {badge && <span class="content-card-type-badge">{badge}</span>}
         {type === 'site' && <ExternalLinkIcon />}
       </div>

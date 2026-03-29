@@ -31,10 +31,10 @@ const TABS = [
 ];
 
 const EMPTY_MESSAGES = {
-  all: 'No content yet',
-  book: 'No books yet',
-  doc: 'No documents yet',
-  site: 'No sites yet',
+  all: { title: 'No content yet', hint: 'Upload a PDF, Markdown file, or ZIP archive via the {admin} to get started.' },
+  book: { title: 'No books yet', hint: 'Upload a PDF via the {admin} to add your first book.' },
+  doc: { title: 'No documents yet', hint: 'Upload a Markdown file via the {admin} to add a document.' },
+  site: { title: 'No sites yet', hint: 'Upload a ZIP archive via the {admin} to publish a static site.' },
 };
 
 export function HomeView() {
@@ -116,14 +116,18 @@ export function HomeView() {
       {!error && filtered && filtered.length === 0 && (
         <div class="home-empty">
           <EmptyIcon />
-          <h2>{EMPTY_MESSAGES[activeTab]}</h2>
-          <p>Upload content via the <a href="#/admin">admin panel</a> to get started.</p>
+          <h2>{EMPTY_MESSAGES[activeTab].title}</h2>
+          <p>{EMPTY_MESSAGES[activeTab].hint.split('{admin}').map((part, i, arr) =>
+            i < arr.length - 1
+              ? <>{part}<a href="#/admin">admin panel</a></>
+              : part
+          )}</p>
         </div>
       )}
 
       {!error && filtered && filtered.length > 0 && (
         <div class="home-grid">
-          {filtered.map((item) => <ContentCard key={item.id} item={item} />)}
+          {filtered.map((item) => <ContentCard key={item.id} item={item} activeTab={activeTab} />)}
         </div>
       )}
     </section>
