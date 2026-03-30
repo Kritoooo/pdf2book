@@ -84,6 +84,8 @@ python -m unittest discover -s tests/scripts -v # Python pipeline tests
 
 **Do I need to install anything locally?** No. Everything runs in GitHub Actions and your browser.
 
+**Do I need to commit frontend build files?** No. `docs/index.html` and `docs/assets/` are generated in the `Deploy to GitHub Pages` workflow. Commit content data such as `docs/books/`, `docs/articles/`, `docs/sites/`, `manifest.json`, and `catalog.json`; Pages rebuilds the frontend bundle during deployment.
+
 **What if MinerU stops being free?** Swap it by modifying `scripts/mineru_client.py`. Works with any PDF-to-Markdown tool.
 
 **Can I edit converted chapters?** Yes. Edit `.md` files in `docs/books/<id>/chapters/` and commit.

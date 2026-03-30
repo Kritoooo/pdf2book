@@ -84,6 +84,8 @@ python -m unittest discover -s tests/scripts -v # Python 流水线测试
 
 **需要在本地安装什么吗？** 不需要。一切在 GitHub Actions 和浏览器中运行。
 
+**需要提交前端构建产物吗？** 不需要。`docs/index.html` 和 `docs/assets/` 由 `Deploy to GitHub Pages` 工作流生成。需要提交的是 `docs/books/`、`docs/articles/`、`docs/sites/`、`manifest.json`、`catalog.json` 这类内容数据；Pages 会在部署时重新构建前端 bundle。
+
 **MinerU 收费了怎么办？** 修改 `scripts/mineru_client.py` 即可替换，兼容任何 PDF 转 Markdown 工具。
 
 **可以手动编辑转换后的章节吗？** 可以。编辑 `docs/books/<id>/chapters/` 下的 `.md` 文件并提交即可。

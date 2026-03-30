@@ -11,7 +11,7 @@ GitShelf is a serverless content shelf on GitHub Pages. Users upload PDFs, Markd
 ### Development
 ```bash
 npm run dev          # Vite dev server (serves src/ with docs/ data via middleware)
-npm run build        # Build to docs/ (does NOT empty docs/, preserves book data)
+npm run build        # Build frontend to docs/ (generated docs/index.html + docs/assets stay ignored)
 npm run preview      # Preview production build
 ```
 
@@ -35,7 +35,7 @@ The `test.yml` workflow runs both Python and JS tests. The content-processing wo
 ## Architecture
 
 ### Two codebases, one repo
-- **Frontend (Preact + Vite):** `src/` builds to `docs/assets/`. Hash-based SPA routing. Renders books, articles, and site cards, with markdown-it, syntax highlighting, and KaTeX support.
+- **Frontend (Preact + Vite):** `src/` builds to generated `docs/index.html` + `docs/assets/`. Those build artifacts are ignored by Git and recreated in the Pages deploy workflow. Renders books, articles, and site cards, with markdown-it, syntax highlighting, and KaTeX support.
 - **Pipeline (Python 3.11):** `scripts/` runs in GitHub Actions. Processes PDFs, Markdown files, and ZIP archives into typed content directories and regenerates catalog data.
 
 ### Data flow
@@ -71,7 +71,8 @@ Upload content (browser → GitHub API → input/)
 | `#/admin` | `AdminView` — lazy-loaded admin panel |
 
 ### Vite config notes
-- Root is `src/`, output is `docs/` (with `emptyOutDir: false`)
+- Root is `src/`, output is `docs/` (with `emptyOutDir: false` and a build hook that clears `docs/assets/` only)
+- Generated `docs/index.html` and `docs/assets/` are ignored by Git; content data under `docs/` remains tracked
 - Custom dev middleware serves `docs/manifest.json`, `docs/books/`, etc.
 - `npm test` runs Vitest unit tests; `npm run test:frontend` uses `vite.frontend.config.js` for integration-style frontend tests
 

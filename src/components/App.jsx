@@ -12,6 +12,7 @@ import { ChapterReader } from './ChapterReader';
 import { BookOverview } from './BookOverview';
 import { ArticleReader } from './ArticleReader';
 import { Footer } from './Footer';
+import { SearchPanel } from './SearchPanel';
 import { fetchManifest } from '../lib/api';
 
 const AdminView = lazy(() => import('./AdminView'));
@@ -24,6 +25,7 @@ export function App() {
   const [tocData, setTocData] = useState(null);
   const [breadcrumb, setBreadcrumb] = useState('');
   const [activeAnchor, setActiveAnchor] = useState(null);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const isChapter = route.type === 'chapter';
   const isBookRoute = route.type === 'book-overview' || route.type === 'chapter';
@@ -45,6 +47,27 @@ export function App() {
   const handleActiveAnchor = useCallback((anchor) => {
     setActiveAnchor(anchor);
   }, []);
+
+  const handleOpenSearch = useCallback(() => setSearchOpen(true), []);
+  const handleCloseSearch = useCallback(() => setSearchOpen(false), []);
+
+  // Global keyboard shortcut: Ctrl+K / Cmd+K or / to open search
+  useEffect(() => {
+    if (!isBookRoute) return;
+    const onKeyDown = (e) => {
+      const tag = e.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) return;
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+      } else if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isBookRoute]);
 
   // Handle site redirect
   useEffect(() => {
@@ -86,6 +109,8 @@ export function App() {
         showSidebarToggle={showSidebar}
         onToggleSidebar={handleToggleSidebar}
         sidebarExpanded={sidebarOpen}
+        showSearch={isBookRoute}
+        onSearch={handleOpenSearch}
         progress={progress}
         showProgress={isChapter}
       />
@@ -131,6 +156,14 @@ export function App() {
       </main>
 
       <Footer />
+      {isBookRoute && (
+        <SearchPanel
+          open={searchOpen}
+          onClose={handleCloseSearch}
+          bookId={route.bookId}
+          tocData={tocData}
+        />
+      )}
       <ScrollToTop visible={showScrollTop} onClick={scrollToTop} />
       <ToastContainer />
     </>

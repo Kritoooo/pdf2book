@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, rmSync } from 'fs';
 import { createHash } from 'crypto';
 import preact from '@preact/preset-vite';
 
@@ -39,6 +39,18 @@ function serveDocsData() {
   };
 }
 
+// Preserve docs/ content data while dropping stale hashed frontend bundles on rebuild.
+function cleanDocsAssets() {
+  const assetsDir = resolve(__dirname, 'docs/assets');
+  return {
+    name: 'clean-docs-assets',
+    apply: 'build',
+    buildStart() {
+      rmSync(assetsDir, { recursive: true, force: true });
+    },
+  };
+}
+
 // Hash plaintext VITE_SITE_PASSWORD at build time so the original password never reaches the bundle.
 function getSitePasswordHash() {
   const plain = process.env.VITE_SITE_PASSWORD;
@@ -53,6 +65,7 @@ export default defineConfig({
         plugins: [],
       },
     }),
+    cleanDocsAssets(),
     serveDocsData(),
   ],
   root: 'src',

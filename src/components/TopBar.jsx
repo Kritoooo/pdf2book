@@ -45,11 +45,21 @@ function GearIcon() {
   );
 }
 
+function SearchIcon() {
+  return (
+    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="8.5" cy="8.5" r="5.5" />
+      <line x1="13" y1="13" x2="17" y2="17" />
+    </svg>
+  );
+}
+
 export function TopBar({
   theme, onToggleTheme,
   contentWidth, onCycleContentWidth, showWidthToggle,
   breadcrumb, showHomeLink,
   showSidebarToggle, onToggleSidebar, sidebarExpanded,
+  showSearch, onSearch,
   progress, showProgress,
 }) {
   const themeLabel = theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
@@ -73,6 +83,11 @@ export function TopBar({
         {breadcrumb && <span class="top-bar-breadcrumb">{breadcrumb}</span>}
       </div>
       <div class="top-bar-right">
+        {showSearch && (
+          <button class="search-toggle" type="button" aria-label="Search book (Ctrl+K)" onClick={onSearch}>
+            <SearchIcon />
+          </button>
+        )}
         {showWidthToggle && (
           <button class="width-toggle" type="button" aria-label={widthLabel} title={widthLabel} onClick={onCycleContentWidth}>
             <WidthIcon width={contentWidth} />

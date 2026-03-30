@@ -142,6 +142,22 @@ function normalizeBullets(text) {
 
 export { normalizeBullets as _normalizeBullets };
 
+/** Strip markdown syntax to plain text for full-text search */
+export function stripMarkdown(text) {
+  return text
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/`[^`]+`/g, '')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/<[^>]+>/g, '')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/(\*{1,3}|_{1,3})(.*?)\1/g, '$2')
+    .replace(/^[-*_]{3,}\s*$/gm, '')
+    .replace(/^>\s*/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 export function renderMarkdown(text, options = {}) {
   const normalized = normalizeBullets(text);
   const html = sanitizeHtml(md.render(normalized, { assetBase: options.assetBase || '' }));
