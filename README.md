@@ -92,6 +92,16 @@ python -m unittest discover -s tests/scripts -v # Python pipeline tests
 
 **Can I upload a static site?** Yes. Package it as a `.zip` with `index.html` at the root and upload through the admin panel.
 
+## Agent Skill
+
+Install the GitShelf skill for Claude Code, Codex, and other AI agents:
+
+```bash
+npx skills add Kritoooo/GitShelf
+```
+
+Once installed, your agent can manage GitShelf content via natural language — upload files, list items, edit metadata, delete content, and check failures.
+
 ## Disclaimer
 
 For **personal study and research only**. Users are responsible for ensuring they have the legal right to convert and host any content. Do not upload copyrighted material without permission. See full disclaimer in the [LICENSE](LICENSE) file.

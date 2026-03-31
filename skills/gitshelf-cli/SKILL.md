@@ -1,11 +1,13 @@
 ---
 name: gitshelf-cli
-description: Use when the user wants to operate a GitShelf site with the gitshelf CLI or npx gitshelf, including config setup, uploads, catalog inspection, metadata edits, deletes, reconvert, and failure checks.
+description: Use when the user wants to operate a GitShelf site with the gitshelf CLI, preferring `npx gitshelf` for config setup, uploads, catalog inspection, metadata edits, deletes, reconvert, and failure checks.
 ---
 
 # GitShelf CLI
 
 Operate a GitShelf repository from the command line.
+
+- Prefer running commands through `npx gitshelf` instead of invoking repository source files directly.
 
 - Treat `.pdf` uploads as `book` items.
 - Treat `.md` uploads as `doc` items.
@@ -36,28 +38,28 @@ Operate a GitShelf repository from the command line.
 - Run `failures` to inspect or retry processing errors.
 
 ```bash
-gitshelf list
-gitshelf list --type site --json
-gitshelf info book:my-book
-gitshelf upload ./article.md
-gitshelf upload ./book.pdf
-gitshelf upload ./site.zip
-gitshelf edit doc:my-article --title "New title"
-gitshelf delete site:my-site
-gitshelf reconvert book:my-book
-gitshelf failures --json
+npx gitshelf list
+npx gitshelf list --type site --json
+npx gitshelf info book:my-book
+npx gitshelf upload ./article.md
+npx gitshelf upload ./book.pdf
+npx gitshelf upload ./site.zip
+npx gitshelf edit doc:my-article --title "New title"
+npx gitshelf delete site:my-site --yes
+npx gitshelf reconvert book:my-book
+npx gitshelf failures --json
 ```
 
 ## npx usage
 
-- Run `npx gitshelf ...` for one-off CLI usage without a global install.
+- Default to `npx gitshelf ...` for CLI usage.
+- Add `NPM_CONFIG_CACHE=/tmp/gitshelf-npm-cache` only if `npx` fails because its default cache path is not writable.
 
 ```bash
 npx gitshelf list
 npx gitshelf upload ./site.zip
+NPM_CONFIG_CACHE=/tmp/gitshelf-npm-cache npx gitshelf upload ./site.zip
 ```
-
-- Set `NPM_CONFIG_CACHE=/tmp/gitshelf-npm-cache` in sandboxed environments when `npx` cannot write to its default cache.
 
 ## Item selectors
 
@@ -70,3 +72,4 @@ npx gitshelf upload ./site.zip
 - Add `--json` when the user wants machine-readable output.
 - Check `failures` after `upload` when processing does not complete.
 - Restrict `reconvert` to `book` items.
+- Add `--yes` to `delete` in non-interactive agent runs.

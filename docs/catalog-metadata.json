@@ -1,7 +1,20 @@
 {
   "version": 1,
-  "updated_at": "2026-03-29T07:36:23.440Z",
+  "updated_at": "2026-03-31T06:18:25.152Z",
   "items": [
+    {
+      "id": "deep-research-report",
+      "type": "doc",
+      "display_title": "",
+      "author": "",
+      "summary": "",
+      "tags": [],
+      "featured": false,
+      "manual_order": null,
+      "visibility": "published",
+      "metadata_updated_at": "2026-03-29T08:41:27Z",
+      "source": "deep_research_report.md"
+    },
     {
       "id": "designing-data-intensive-applications-2nd-edition",
       "type": "book",
