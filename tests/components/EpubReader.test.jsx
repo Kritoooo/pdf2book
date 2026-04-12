@@ -11,6 +11,7 @@ const renditionMock = {
   on: renditionOnMock,
   off: renditionOffMock,
   reportLocation: renditionReportLocationMock,
+  getContents: vi.fn(() => []),
   themes: {
     registerCss: vi.fn(),
     select: vi.fn(),
@@ -66,13 +67,15 @@ beforeEach(() => {
   bookLocationsGenerateMock.mockClear();
   bookRenderToMock.mockClear();
   epubFactoryMock.mockClear();
+  renditionMock.getContents.mockReturnValue([]);
+  global.requestAnimationFrame = (cb) => setTimeout(cb, 0);
 
   global.fetch = mockFetch({
     'books/demo-book/toc.json': {
       title: 'Demo EPUB',
       children: [
-        { title: 'Chapter One', slug: 'chapter-1', href: 'OPS/chapter-1.xhtml' },
-        { title: 'Chapter Two', slug: 'chapter-2', href: 'OPS/chapter-2.xhtml' },
+        { title: 'Chapter One', slug: 'chapter-1', href: 'chapter-1.xhtml' },
+        { title: 'Chapter Two', slug: 'chapter-2', href: 'chapter-2.xhtml' },
       ],
     },
   });
@@ -105,5 +108,51 @@ describe('EpubReader', () => {
     );
     expect(bookRenderToMock).toHaveBeenCalled();
     expect(bookLocationsGenerateMock).toHaveBeenCalled();
+  });
+
+  it('scrolls to the matching heading when multiple TOC entries share one XHTML file', async () => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(
+      `
+        <html>
+          <body>
+            <p><span>1.2 线程的优势</span></p>
+            <p><span>1.2.1 发挥多处理器的强大能力</span></p>
+            <p>Body text.</p>
+          </body>
+        </html>
+      `,
+      'text/html',
+    );
+    const scrollIntoView = vi.fn();
+    doc.querySelectorAll('span').forEach((element) => {
+      element.scrollIntoView = scrollIntoView;
+    });
+    renditionMock.getContents.mockReturnValue([{ document: doc }]);
+
+    global.fetch = mockFetch({
+      'books/demo-book/toc.json': {
+        title: 'Demo EPUB',
+        children: [
+          { title: '1.2 线程的优势', slug: 'section-1-2', href: 'text00005.xhtml' },
+          { title: '1.2.1 发挥多处理器的强大能力', slug: 'section-1-2-1', href: 'text00005.xhtml' },
+        ],
+      },
+    });
+
+    render(
+      <EpubReader
+        bookId="demo-book"
+        slug="section-1-2-1"
+        onTocLoaded={() => {}}
+        onActiveAnchor={() => {}}
+        onProgressChange={() => {}}
+        theme="light"
+      />,
+    );
+
+    await waitFor(() => expect(renditionDisplayMock).toHaveBeenCalledWith('text00005.xhtml'));
+    await waitFor(() => expect(scrollIntoView).toHaveBeenCalled());
+    expect(renditionReportLocationMock).toHaveBeenCalled();
   });
 });
